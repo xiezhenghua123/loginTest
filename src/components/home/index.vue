@@ -8,45 +8,44 @@
   </div>
 </template>
 <script>
-import creatQuest from '../../core/axios'
-import jsencrypt from '../../core/security/jsencrypt'
-import { randomGenerate } from '../../core/security/random'
-import { aesEncrypt } from '../../core/security/index'
+import creatQuest from "../../core/axios";
+import jsencrypt from "../../core/security/jsencrypt";
+import { randomGenerate } from "../../core/security/random";
 
 export default {
   data() {
     return {
-      username: '',
-      password: '',
-    }
+      username: "",
+      password: "",
+    };
   },
   methods: {
     async login() {
-      let { data } = await creatQuest().post('/getPubKey')
+      let { data } = await creatQuest().post("/getPubKey");
 
-      const aseKey = randomGenerate(16)
-      const aseIv = randomGenerate(16)
+      const aseKey = randomGenerate(16);
+      const aseIv = randomGenerate(16);
       const ase = {
-        key: aesEncrypt(aseKey, aseKey, aseIv),
-        iv: aesEncrypt(aseIv, aseKey, aseIv),
-      }
+        key: jsencrypt(aseKey, data.pubKey),
+        iv: jsencrypt(aseIv, data.pubKey),
+      };
       await creatQuest({
         headers: {
-          'Content-Type': 'application/json;charset=utf-8',
+          "Content-Type": "application/json;charset=utf-8",
         },
       })
-        .post('/login', {
+        .post("/login", {
           username: this.username,
           password: jsencrypt(this.password, data.pubKey),
           aesKey: ase,
         })
-        .then(data => {
-          console.log(data)
+        .then((data) => {
+          console.log(data);
         })
-        .catch(err => {
-          console.log(err)
-        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
   },
-}
+};
 </script>
